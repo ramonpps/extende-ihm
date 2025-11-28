@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extende - Gerenciar Projetos</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: #f8fafc; font-family: "DM Sans", sans-serif; }
+        .navbar { background-color: #1e3a8a; padding: 15px 40px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 24px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
+        .navbar a:hover { text-decoration: underline; }
+        .container { padding: 40px; max-width: 1000px; margin: 0 auto; }
+        .project-card-prof { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 6px solid #1d4ed8; }
+        .project-card-prof h4 { margin-top: 0; color: #1e3a8a; font-size: 20px; }
+        .action-btn { background-color: #f59e0b; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 13px; margin-left: 10px; cursor: pointer; }
+        .action-btn.green { background-color: #22c55e; }
+        .action-btn.blue { background-color: #1d4ed8; }
+        .action-btn.red { background-color: #ef4444; }
+        .status-tag { padding: 5px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; background-color: #e0f2fe; color: #0ea5e9; }
+        .tag-info { font-size: 12px; padding: 2px 5px; background: #fffbe0; border: 1px solid #f97316; color: #f97316; border-radius: 3px; margin-right: 5px; }
+    </style>
+</head>
+<body onload="carregarProjetosCoordenador()">
+    <div id="navbar-placeholder"></div>
+    
+    <div class="container">
+        <h2 style="color: #1e3a8a;"><i class="fa-solid fa-folder-open"></i> Gerenciar Projetos Ativos</h2>
+        <p style="color: #64748b;">Visualize o status, vagas e as candidaturas de seus projetos publicados.</p>
+        
+        <div id="project-list">
+            </div>
+    </div>
+    
+    <script>
+        const PROFESSOR_ID = parseInt(localStorage.getItem('userId')) || 101;
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="../aluno/portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="../aluno/candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'professor');
+
+        function atualizarStatus(projetoId, novoStatus) {
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            if (!dbString) return;
+            let db = JSON.parse(dbString);
+            
+            const projetoIndex = db.projetos.findIndex(p => p.id === projetoId);
+            if (projetoIndex !== -1) {
+                
+                db.projetos[projetoIndex].status = novoStatus;
+                
+                if (novoStatus === 'Arquivado') {
+                    db.projetos[projetoIndex].isArchived = true;
+                    alert(`Projeto ID ${projetoId} arquivado com sucesso.`);
+                } else if (novoStatus === 'Encerrado') {
+                    alert(`Recrutamento do projeto ID ${projetoId} encerrado.`);
+                } else if (novoStatus === 'Em Edição') {
+                     alert(`Abrindo formulário de edição para o projeto ID ${projetoId}. (Simulação)`);
+                }
+
+                localStorage.setItem('PROTÓTIPO_DB', JSON.stringify(db));
+                carregarProjetosCoordenador(); 
+            }
+        }
+
+
+        function carregarProjetosCoordenador() {
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { projetos: [], candidaturas: [] };
+            
+            // CORREÇÃO: Filtra projetos pelo ID do professor logado (numérico)
+            const projetosDoProfessor = db.projetos.filter(p => parseInt(p.coordenadorId) === PROFESSOR_ID && p.status !== 'Arquivado');
+            
+            const projectListDiv = document.getElementById('project-list');
+            projectListDiv.innerHTML = '';
+            
+            if (projetosDoProfessor.length === 0) {
+                projectListDiv.innerHTML = '<p style="padding: 20px; background: white; border-radius: 8px;">Nenhum projeto encontrado. Comece criando um novo projeto!</p>';
+                return;
+            }
+
+            projetosDoProfessor.forEach(projeto => {
+                // Candidaturas filtradas por ID numérico do projeto
+                const candidaturasNoProjeto = db.candidaturas.filter(c => parseInt(c.projetoId) === projeto.id && c.status === 'PENDENTE').length;
+                
+                let borderColor = '#1d4ed8'; // Default
+                let statusColor = '#0ea5e9';
+                let statusBg = '#e0f2fe';
+                
+                if (projeto.status === 'Em Andamento') {
+                    borderColor = '#065f46';
+                    statusColor = '#065f46';
+                    statusBg = '#dcfce7';
+                } else if (projeto.status === 'Encerrado') {
+                     borderColor = '#64748b';
+                     statusColor = '#64748b';
+                     statusBg = '#f1f5f9';
+                }
+                
+                const interTags = projeto.interseccionalidade.map(tag => `<span class="tag-info">${tag}</span>`).join('');
+
+
+                const cardHtml = `
+                    <div class="project-card-prof" style="border-left: 6px solid ${borderColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4>${projeto.titulo}</h4>
+                            <span class="status-tag" style="background-color: ${statusBg}; color: ${statusColor};">${projeto.status}</span>
+                        </div>
+                        <p style="font-size: 14px; color: #475569;">
+                            Área: ${projeto.area} | Vagas: ${projeto.vaga} | Candidatos Pendentes: <b>${candidaturasNoProjeto}</b>
+                        </p>
+                        <p style="margin-top: 5px;">
+                            ${interTags}
+                        </p>
+                        
+                        <button class="action-btn blue" onclick="window.location.href='analisar_candidatos.html?id=${projeto.id}'">
+                            <i class="fa-solid fa-users"></i> Analisar Candidatos (${candidaturasNoProjeto})
+                        </button>
+                        
+                        
+                        ${projeto.status !== 'Encerrado' ? `
+                        <button class="action-btn" onclick="atualizarStatus(${projeto.id}, 'Encerrado')">
+                            <i class="fa-solid fa-lock"></i> Encerrar Recrutamento
+                        </button>` : ''}
+
+                        <button class="action-btn red" onclick="atualizarStatus(${projeto.id}, 'Arquivado')">
+                            <i class="fa-solid fa-archive"></i> Arquivar Projeto
+                        </button>
+                    </div>
+                `;
+                projectListDiv.innerHTML += cardHtml;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extende - Configurar Divulgação</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: #f8fafc; font-family: "DM Sans", sans-serif; }
+        .navbar { background-color: #1e3a8a; padding: 15px 40px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 24px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
+        .navbar a:hover { text-decoration: underline; }
+        .container { padding: 40px; max-width: 800px; margin: 0 auto; }
+        .config-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .mock-info-card {
+            background-color: #e0f2fe; border-left: 5px solid #0ea5e9; padding: 20px; margin-bottom: 30px; border-radius: 4px;
+        }
+        .mock-info-card h4 { color: #0369a1; margin-top: 0; font-size: 18px; }
+        .mock-info-card p { font-size: 32px; font-weight: bold; color: #0ea5e9; margin: 5px 0 0 0; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; font-size: 14px;}
+        .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; box-sizing: border-box; background-color: #f8fafc;
+        }
+        .mock-btn { background-color: #22c55e; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body onload="carregarProjetoData()">
+    <div id="navbar-placeholder"></div>
+    
+    <div class="container">
+        <h2 style="color: #1e3a8a; margin-top: 0;"><i class="fa-solid fa-share-alt"></i> Configuração de Divulgação</h2>
+        
+        <div class="config-container">
+            <h3 id="projeto-titulo-divulgacao">Projeto: [Nome do Projeto]</h3>
+            <p style="color: #64748b; margin-bottom: 30px;">Defina o público-alvo e personalize a mensagem de notificação.</p>
+
+            <div class="mock-info-card">
+                <h4><i class="fa-solid fa-bell"></i> Alcance Principal (Baseado nos Requisitos)</h4>
+                <p>~35 alunos</p>
+                <p id="alcance-info" style="font-size: 14px; font-weight: normal; color: #0369a1;">Serão notificados por e-mail e push (Alunos que atendem ao perfil).</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="alcanceSecundario">Refinar Alcance Secundário</label>
+                <select id="alcanceSecundario">
+                    <option value="nenhum">Nenhum (Apenas o Alcance Principal)</option>
+                    <option value="calouros">Incluir Calouros (1º e 2º período)</option>
+                    <option value="fora_circulo">Incluir cursos relacionados (Ex: Design, Serviço Social)</option>
+                    <option value="Negritude (Pretos e Pardos)">Foco: Negritude (Pretos e Pardos)</option>
+                    <option value="Mulheres em Tecnologia">Foco: Mulheres em Tecnologia</option>
+                    <option value="Renda Baixa">Foco: Renda Baixa</option>
+                    <option value="Pessoa com Deficiência (PCD)">Foco: Acessibilidade/PCD</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="mensagem">Mensagem Personalizada para Notificação</label>
+                <textarea id="mensagem" rows="3">Oportunidade de [VAGA] para aplicar seus conhecimentos! Junte-se à nossa equipe!</textarea>
+            </div>
+
+            <button class="mock-btn" onclick="publicarDivulgar()">Publicar e Enviar Notificações</button>
+        </div>
+    </div>
+    <script>
+        let projetoData = {};
+        const PROFESSOR_ID = parseInt(localStorage.getItem('userId')) || 101;
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="../aluno/portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="../aluno/candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'professor');
+        
+        function carregarProjetoData() {
+            const dataString = sessionStorage.getItem('novoProjetoData');
+            if (!dataString) {
+                alert('Erro: Dados do projeto não encontrados. Retornando para a criação.');
+                window.location.href = 'criar_projeto.html';
+                return;
+            }
+            projetoData = JSON.parse(dataString);
+            
+            document.getElementById('projeto-titulo-divulgacao').textContent = 'Projeto: ' + projetoData.titulo;
+            
+            // CORREÇÃO DA LABEL {AREA}
+            document.getElementById('alcance-info').innerHTML = `Serão notificados por e-mail e push (Alunos de <b>${projetoData.area}</b> que atendem ao perfil).`;
+
+            // Pré-preenche a mensagem
+            const foco = projetoData.interseccionalidade || '';
+            document.getElementById('mensagem').value = `Oportunidade de ${projetoData.vaga} em ${projetoData.area}. ${foco ? 'Vaga com foco em ' + foco + '.' : ''} Junte-se à nossa equipe!`;
+        }
+
+
+        function publicarDivulgar() {
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { projetos: [], lastProjectId: 0 };
+            
+            // Atribui novo ID e integra dados
+            const novoId = db.lastProjectId + 1;
+            projetoData.id = novoId;
+            
+            // Inclui o professor logado
+            projetoData.coordenadorId = PROFESSOR_ID;
+
+            db.projetos.push(projetoData);
+            db.lastProjectId = novoId;
+            
+            // Salva no DB Central (localStorage)
+            localStorage.setItem('PROTÓPÓ_DB', JSON.stringify(db));
+            
+            // Limpa a sessão e transiciona
+            sessionStorage.removeItem('novoProjetoData');
+
+            window.location.href = 'publicacao_confirmada.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extende UFF - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: "DM Sans", sans-serif; }
+        .login-box { width: 350px; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        .login-box h2 { color: #1e3a8a; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; color: #334155; margin-bottom: 5px; font-size: 14px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; box-sizing: border-box; }
+        .mock-btn { width: 100%; background-color: #1e3a8a; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: background-color 0.2s; }
+        .mock-btn:hover { opacity: 0.9; }
+        .error-message { color: #ef4444; margin-top: 15px; font-size: 14px; display: none; }
+        .info-box { margin-top: 20px; padding: 15px; background-color: #e0f2fe; border: 1px solid #3b82f6; border-radius: 5px; font-size: 12px; text-align: left; }
+    </style>
+</head>
+<body onload="setupDatabase()">
+    <div class="login-box">
+        <h2><i class="fa-solid fa-graduation-cap"></i> Extende UFF</h2>
+        <p style="color: #64748b; font-size: 14px;">Entre com suas credenciais.</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="text" id="email" required placeholder="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" required placeholder="senha">
+            </div>
+            
+            <button type="submit" class="mock-btn">Entrar</button>
+        </form>
+        
+        <div id="errorMessage" class="error-message">
+            E-mail ou senha incorretos.
+        </div>
+
+        
+        <button onclick="restaurarBancoDeDados()" class="mock-btn" style="background-color: #7c3aed; margin-top: 20px;">
+            <i class="fa-solid fa-sync-alt"></i> Restaurar BD (Mocks Iniciais)
+        </button>
+        </div>
+
+    <script>
+        const PROFESSOR_ID = 101; 
+        const ALUNO_ID = 201;    
+        const ALUNO_MATRICULA = '12231013'; 
+
+        function setupDatabase() {
+            // Se a base de dados já existe, não faz nada
+            if (localStorage.getItem('PROTÓTIPO_DB') && localStorage.getItem('PROTÓTIPO_DB').includes('lastProjectId')) {
+                return;
+            }
+
+            // --- PROJETOS (DB Central) ---
+            const projetos = [
+                // 1. Projeto Principal do Professor (Vaga Afirmativa: Mulheres em Tecnologia)
+                {
+                    "id": 1,
+                    "coordenadorId": PROFESSOR_ID,
+                    "titulo": "Plataforma Colaborativa de Suporte Digital",
+                    "descricao": "Desenvolvimento de uma plataforma de código aberto para apoiar comunidades locais na organização de eventos e distribuição de recursos.",
+                    "area": "Ciência da Computação",
+                    "vaga": "Bolsa de Extensão",
+                    "status": "Aceitando Inscrições",
+                    "carga_horaria": "Flexível / Remoto",
+                    "tags": ["Ciência da Computação", "Bolsa", "Vaga Afirmativa", "Desenvolvimento"],
+                    "interseccionalidade": ["Mulheres em Tecnologia"]
+                },
+                // 2. Projeto - Foco: Pessoas com Deficiência (PCD)
+                {
+                    "id": 2,
+                    "coordenadorId": 999, 
+                    "titulo": "Desenvolvimento de Materiais Acessíveis (PCD)",
+                    "descricao": "Criação de materiais educativos e laboratoriais adaptados para Pessoas com Deficiência (PCD).",
+                    "area": "Engenharia Química",
+                    "vaga": "Voluntariado",
+                    "status": "Aceitando Inscrições",
+                    "carga_horaria": "Fixo / Presencial",
+                    "tags": ["Engenharia Química", "Voluntariado", "Acessibilidade", "Pessoa com Deficiência (PCD)"],
+                    "interseccionalidade": ["Pessoa com Deficiência (PCD)"]
+                },
+                // 3. Projeto - Foco: Renda Baixa (Candidatura do Aluno Logado)
+                {
+                    "id": 3,
+                    "coordenadorId": 999,
+                    "titulo": "Educação Financeira para Comunidades (Renda Baixa)",
+                    "descricao": "Projeto focado em fornecer consultoria e educação financeira básica, priorizando alunos de baixa renda para as vagas.",
+                    "area": "Direito e Sociedade",
+                    "vaga": "Bolsa de Extensão",
+                    "status": "Aceitando Inscrições",
+                    "carga_horaria": "Flexível / Remoto",
+                    "tags": ["Direito e Sociedade", "Bolsa", "Renda Baixa", "Educação"],
+                    "interseccionalidade": ["Renda Baixa"]
+                },
+                // 4. Projeto do Professor - Foco: Negritude
+                {
+                    "id": 4,
+                    "coordenadorId": PROFESSOR_ID,
+                    "titulo": "História e Cultura Afro-Brasileira (Negritude)",
+                    "descricao": "Criação de acervo digital e material didático sobre a história e cultura afro-brasileira, priorizando a contratação de alunos autodeclarados Pretos ou Pardos.",
+                    "area": "Artes e Cultura",
+                    "vaga": "Voluntariado",
+                    "status": "Aceitando Inscrições",
+                    "carga_horaria": "Híbrido",
+                    "tags": ["Artes e Cultura", "Voluntariado", "Negritude (Pretos e Pardos)", "Educação"],
+                    "interseccionalidade": ["Negritude (Pretos e Pardos)"]
+                },
+                // 5. Projeto Encerrado (Para teste de filtro)
+                {
+                    "id": 5,
+                    "coordenadorId": 999,
+                    "titulo": "Projeto Encerrado (Medicina Veterinária)",
+                    "descricao": "Vagas já preenchidas.",
+                    "area": "Medicina Veterinária",
+                    "vaga": "Voluntariado",
+                    "status": "Encerrado",
+                    "carga_horaria": "Tarde",
+                    "tags": ["Medicina Veterinária", "Voluntariado"],
+                    "interseccionalidade": [] 
+                },
+            ];
+
+            // --- CANDIDATURAS (DB Central) ---
+            const candidaturas = [
+                // Candidatura 1 (PENDENTE no Projeto 1 - Do Professor Logado)
+                {
+                    "alunoId": 301,
+                    "projetoId": 1,
+                    "status": "PENDENTE",
+                    "mensagem": "Tenho experiência com front-end e um grande interesse em projetos de impacto social.",
+                    "data": "15/11/2025",
+                    "aluno": {
+                        "nome": "Carla Dias",
+                        "matricula": "12232005",
+                        "curso": "Ciência da Computação",
+                        "periodo": "5º",
+                        "email": "carla.dias@id.uff.br",
+                        "curriculo": "Experiência sólida em JavaScript, React e design de APIs REST. Candidata-se a vagas afirmativas para mulheres em tecnologia.",
+                        "interseccionalidade": ["Mulheres em Tecnologia", "Renda Baixa", "Parda"] 
+                    }
+                },
+                // Candidatura 2 (PENDENTE no Projeto 1 - Do Professor Logado)
+                {
+                    "alunoId": 302,
+                    "projetoId": 1,
+                    "status": "PENDENTE",
+                    "mensagem": "Busco minha primeira experiência de bolsa. Sou proativo e aprendo rápido.",
+                    "data": "12/11/2025",
+                    "aluno": {
+                        "nome": "Bruno Souza",
+                        "matricula": "12231008",
+                        "curso": "Sistemas de Informação",
+                        "periodo": "3º",
+                        "email": "bruno.s@id.uff.br",
+                        "curriculo": "Foco em desenvolvimento back-end com Python/Django. Conhecimento em IoT.",
+                        "interseccionalidade": ["Homem", "Nenhuma"] 
+                    }
+                },
+                // Candidatura 3 (Candidatura do ALUNO LOGADO no Projeto 3 - Renda Baixa)
+                {
+                    "alunoId": ALUNO_ID,
+                    "projetoId": 3, 
+                    "status": "PENDENTE",
+                    "mensagem": "Possuo grande interesse no tema de educação financeira para comunidades.",
+                    "data": "28/11/2025",
+                    "aluno": {
+                        "nome": "Alex Pereira",
+                        "matricula": ALUNO_MATRICULA,
+                        "curso": "Ciência da Computação",
+                        "periodo": "5º",
+                        "email": "aluno@id.uff.br",
+                        "curriculo": "Experiência com HTML, CSS, e JS, além de interesse em UX/UI. Minha matrícula é 12231013.",
+                        "interseccionalidade": ["Homem", "Pardo"] 
+                    }
+                },
+            ];
+
+            const db = { projetos, candidaturas, lastProjectId: 5 }; 
+            localStorage.setItem('PROTÓTIPO_DB', JSON.stringify(db));
+        }
+
+        function restaurarBancoDeDados() {
+            if (confirm("ATENÇÃO: Esta ação irá DESTRUIR todos os dados salvos (candidaturas, status de projetos, etc.) e restaurar a base de dados mock para o estado inicial. Deseja continuar?")) {
+                localStorage.removeItem('PROTÓTIPO_DB');
+                alert("Banco de dados resetado com sucesso! Recarregando a página.");
+                // Recarrega a página, o que forçará setupDatabase() a rodar e recriar os mocks.
+                window.location.reload(); 
+            }
+        }
+
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('errorMessage');
+            
+            errorElement.style.display = 'none';
+
+            const alunoEmail = 'aluno@id.uff.br';
+            const profEmail = 'professor@id.uff.br';
+            const senha = '123456';
+
+            if (password !== senha) {
+                errorElement.textContent = 'Senha incorreta.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            if (email === alunoEmail) {
+                localStorage.setItem('userType', 'aluno');
+                localStorage.setItem('userId', ALUNO_ID);
+                window.location.href = 'aluno/portal_aluno.html';
+            } else if (email === profEmail) {
+                localStorage.setItem('userType', 'professor');
+                localStorage.setItem('userId', PROFESSOR_ID);
+                window.location.href = 'professor/portal_professor.html';
+            } else {
+                errorElement.textContent = 'Usuário não encontrado.';
+                errorElement.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

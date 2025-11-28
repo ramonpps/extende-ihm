@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Candidatos - Extende UFF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        /* Navbar de mock */
+        .navbar {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+        /* Layout Principal */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+        h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .back-link {
+            display: block;
+            margin-bottom: 25px;
+            color: #1e3a8a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .candidate-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .candidate-card h4 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 20px;
+        }
+        .candidate-card p {
+            font-size: 14px;
+            color: #475569;
+            margin: 5px 0;
+        }
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 15px;
+            transition: opacity 0.2s;
+        }
+        .btn-select {
+            background-color: #22c55e;
+            color: white;
+        }
+        .btn-select:hover { opacity: 0.9; }
+        .btn-reject {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-reject:hover { opacity: 0.9; }
+        .btn-curriculo {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-curriculo:hover { opacity: 0.9; }
+        .filter-group {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: #334155;
+        }
+        .mock-select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #f0fdf4;
+            border: 1px solid #22c55e;
+            color: #15803d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        /* Estilos de Impressão (Visualização do Currículo) */
+        @media print {
+            body > *:not(.print-content) {
+                display: none;
+            }
+            .print-content {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 30px;
+                box-shadow: none;
+                font-size: 11pt;
+            }
+            .print-content h3 {
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+            }
+            .print-content p {
+                margin-top: 10px;
+                font-size: 10pt;
+            }
+        }
+        /* Modal para dispositivos que não suportam bem o @media print */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 70%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .print-content-modal {
+            padding: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+    </style>
+</head>
+<body onload="renderizarCandidatos()">
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <a href="gerenciar_projetos.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao Gerenciamento
+        </a>
+        
+        <h2><i class="fa-solid fa-users-line"></i> Candidatos: <span id="project-title">...</span></h2>
+        <p id="candidature-info" style="color: #64748b; margin-bottom: 20px;">
+            <span id="candidatos-count">...</span>
+        </p>
+
+        <div class="filter-group">
+            <label for="filter-status">Filtrar por Status:</label>
+            <select id="filter-status" class="mock-select" onchange="renderizarCandidatos()">
+                <option value="PENDENTE">Pendentes</option>
+                <option value="APROVADO">Aprovados</option>
+                <option value="REJEITADO">Rejeitados</option>
+                <option value="TODOS">Todos</option>
+            </select>
+            <label for="filter-interseccionalidade">Priorizar:</label>
+            <select id="filter-interseccionalidade" class="mock-select" onchange="renderizarCandidatos()">
+                <option value="TODOS">Sem Prioridade</option>
+                <option value="Negritude (Pretos e Pardos)">Negritude (Pretos e Pardos)</option>
+                <option value="Mulheres em Tecnologia">Mulheres em Tecnologia</option>
+                <option value="Renda Baixa">Renda Baixa</option>
+                <option value="Pessoa com Deficiência (PCD)">Acessibilidade/PCD</option>
+            </select>
+        </div>
+
+        <div id="candidatos-list">
+        </div>
+    </div>
+    
+    <div id="curriculoModal" class="modal">
+        <div class="modal-content">
+            <button style="float: right; font-size: 20px; border: none; background: transparent; cursor: pointer;" onclick="fecharModal()">&times;</button>
+            <div id="print-content" class="print-content-modal">
+            </div>
+            <button class="btn btn-curriculo" style="margin-top: 20px;" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir Currículo</button>
+        </div>
+    </div>
+
+
+    <script>
+        const PROFESSOR_ID = parseInt(localStorage.getItem('userId')) || 101;
+        
+        // --- FUNÇÕES DE NAVEGAÇÃO E UTILS ---
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="../aluno/portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="../aluno/candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'professor');
+        
+        function getProjectIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') ? parseInt(params.get('id')) : 1; 
+        }
+
+        // --- FUNÇÕES DE MODIFICAÇÃO DE DADOS ---
+        
+        function updateCandidaturaStatus(alunoId, projetoId, status) {
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            if (!dbString) return;
+            let db = JSON.parse(dbString);
+
+            // Atualiza o status da candidatura
+            const candidatura = db.candidaturas.find(c =>
+                parseInt(c.alunoId) === alunoId && parseInt(c.projetoId) === projetoId
+            );
+
+            if (!candidatura) return;
+
+            candidatura.status = status;
+
+            if (status === 'APROVADO') {
+                alert("Candidatura aceita! O aluno foi notificado.");
+            } else if (status === 'REJEITADO') {
+                alert("Candidatura rejeitada. O aluno foi notificado.");
+            }
+            
+            // Corrige o nome da chave e salva
+            localStorage.setItem('PROTÓTIPO_DB', JSON.stringify(db));
+            renderizarCandidatos();
+        }
+        
+        // --- FUNÇÃO DE VISUALIZAÇÃO DE CURRÍCULO ---
+
+        function verCurriculo(candidato) {
+            const cvContentDiv = document.getElementById('print-content');
+            
+            cvContentDiv.innerHTML = `
+                <h3 style="color: #1e3a8a;">Currículo Vitae</h3>
+                <p><strong>Nome:</strong> ${candidato.aluno.nome}</p>
+                <p><strong>Matrícula:</strong> ${candidato.aluno.matricula}</p>
+                <p><strong>Curso:</strong> ${candidato.aluno.curso} (${candidato.aluno.periodo}º Período)</p>
+                <p><strong>E-mail:</strong> ${candidato.aluno.email}</p>
+                <hr>
+                <h4 style="color: #475569;">Experiência e Habilidades</h4>
+                <p style="white-space: pre-wrap;">${candidato.aluno.curriculo}</p>
+                <hr>
+                <h4 style="color: #475569;">Mensagem de Candidatura</h4>
+                <p style="white-space: pre-wrap;">${candidato.mensagem}</p>
+            `;
+            
+            document.getElementById('curriculoModal').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('curriculoModal').style.display = 'none';
+        }
+
+        // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
+
+        function renderizarCandidatos() {
+            const PROJECT_ID = getProjectIdFromUrl();
+            const listDiv = document.getElementById('candidatos-list');
+            listDiv.innerHTML = '';
+            
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            if (!dbString) { 
+                listDiv.innerHTML = '<p>Erro ao carregar dados.</p>'; 
+                return; 
+            }
+
+            const db = JSON.parse(dbString);
+            const projeto = db.projetos.find(p => parseInt(p.id) === PROJECT_ID); 
+            
+            if (!projeto) { 
+                listDiv.innerHTML = '<p>Projeto não encontrado.</p>'; 
+                return; 
+            }
+
+            const statusFiltro = document.getElementById('filter-status').value;
+            const prioridadeFiltro = document.getElementById('filter-interseccionalidade').value;
+            
+            let candidatosDoProjeto = db.candidaturas.filter(c => 
+                parseInt(c.projetoId) === PROJECT_ID && 
+                (statusFiltro === 'TODOS' || c.status === statusFiltro)
+            );
+
+            // Aplica filtro de prioridade (AGORA REALMENTE FILTRA)
+            if (prioridadeFiltro !== 'TODOS') {
+                candidatosDoProjeto = candidatosDoProjeto.filter(c =>
+                    Array.isArray(c.aluno.interseccionalidade) &&
+                    c.aluno.interseccionalidade.includes(prioridadeFiltro)
+                );
+            }
+            
+            // Atualiza informações do painel
+            document.getElementById('project-title').textContent = projeto.titulo;
+            document.getElementById('candidatos-count').textContent = `${candidatosDoProjeto.length} Candidatos Encontrados. Vagas: 2 ${projeto.vaga}(s). (Info)`;
+            
+            if (candidatosDoProjeto.length === 0) {
+                 listDiv.innerHTML = '<p style="text-align: center; color: #64748b;">Nenhum candidato encontrado com o filtro selecionado.</p>';
+                 return;
+            }
+
+            candidatosDoProjeto.forEach(candidato => {
+                let borderColor = '#f59e0b'; // Pendente
+                if (candidato.status === 'APROVADO') {
+                    borderColor = '#22c55e'; // Aprovado
+                } else if (candidato.status === 'REJEITADO') {
+                    borderColor = '#ef4444'; // Rejeitado
+                }
+                
+                const isPrioritario = prioridadeFiltro !== 'TODOS' &&
+                    Array.isArray(candidato.aluno.interseccionalidade) &&
+                    candidato.aluno.interseccionalidade.includes(prioridadeFiltro);
+                if (isPrioritario) borderColor = '#1d4ed8'; // Destaque de prioridade
+                
+                // Formata o perfil interseccionalidade
+                const perfilInterseccional = Array.isArray(candidato.aluno.interseccionalidade)
+                    ? candidato.aluno.interseccionalidade.map(item => {
+                        const tagStyle = item === 'Negritude (Pretos e Pardos)' ? 'background-color: #6d28d9; color: white; border: 1px solid #6d28d9;' : '';
+                        return `<span class="tag" style="${tagStyle}">${item}</span>`;
+                    }).join('')
+                    : '';
+
+                const cardHtml = `
+                    <div class="candidate-card" style="border-left: 4px solid ${borderColor};">
+                        <h4>${candidato.aluno.nome} (Matrícula: ${candidato.aluno.matricula}) ${isPrioritario ? '<span class="tag" style="background-color: #1d4ed8; color: white;">Prioritário</span>' : ''}</h4>
+                        <p>
+                            <i class="fa-solid fa-flask"></i> Curso: ${candidato.aluno.curso} | 
+                            <i class="fa-solid fa-calendar-check"></i> Período: ${candidato.aluno.periodo} | 
+                            <i class="fa-solid fa-envelope"></i> Contato: ${candidato.aluno.email}
+                        </p>
+                        <p style="font-weight: bold; color: #1e3a8a;"><i class="fa-solid fa-heart"></i> Perfil de Inclusão/Interseccionalidade: ${perfilInterseccional || 'Nenhuma categoria relevante'}</p>
+                        <p style="font-style: italic; color: #1d4ed8;">Mensagem: "${candidato.mensagem}"</p>
+                        
+                        <button class="btn btn-select" onclick="updateCandidaturaStatus(${candidato.alunoId}, ${candidato.projetoId}, 'APROVADO')">
+                            <i class="fa-solid fa-check"></i> Selecionar
+                        </button>
+                        <button class="btn btn-reject" onclick="updateCandidaturaStatus(${candidato.alunoId}, ${candidato.projetoId}, 'REJEITADO')">
+                            <i class="fa-solid fa-times"></i> Rejeitar
+                        </button>
+                        
+                        <button class="btn btn-curriculo" onclick='verCurriculo(${JSON.stringify(candidato)})'>
+                            <i class="fa-solid fa-file-pdf"></i> Ver Currículo
+                        </button>
+                    </div>
+                `;
+                listDiv.innerHTML += cardHtml;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extende - Detalhes do Projeto</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: #f8fafc; font-family: "DM Sans", sans-serif; }
+        .navbar { background-color: #1e3a8a; padding: 15px 40px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 24px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
+        .navbar a:hover { text-decoration: underline; }
+        .container { padding: 40px; max-width: 900px; margin: 0 auto; }
+        .project-details { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .project-details h3 { color: #1e3a8a; font-size: 30px; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+        .info-block { margin-bottom: 25px; padding: 15px; border-left: 4px solid #1d4ed8; background-color: #f1f5f9; border-radius: 4px; }
+        .info-block strong { color: #1e3a8a; display: block; margin-bottom: 5px; }
+        .mock-btn { background-color: #22c55e; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        .mock-btn-secondary { background-color: #64748b; margin-left: 10px; }
+        #btn-candidatar { transition: background-color 0.3s; }
+        #btn-candidatar.candidatado { background-color: #94a3b8; cursor: not-allowed; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 30px; border: 1px solid #888; width: 50%; border-radius: 8px; }
+        .modal-content textarea { width: 100%; height: 120px; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical; box-sizing: border-box; }
+    </style>
+</head>
+<body onload="carregarDetalhes()">
+    <div id="navbar-placeholder"></div>
+    
+    <div class="container">
+        <div class="project-details">
+            <a href="portal_aluno.html" style="color: #64748b; text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Voltar à Busca</a>
+            
+            <h3 id="project-titulo">Carregando...</h3>
+            <p id="project-info" style="color: #64748b; font-size: 14px;">Coordenador: N/A</p>
+
+            <div class="info-block">
+                <strong>Descrição Detalhada:</strong>
+                <p id="project-descricao">Carregando...</p>
+            </div>
+
+            <div class="info-block">
+                <strong>Requisitos e Vaga:</strong>
+                <ul id="project-requisitos" style="margin-top: 5px; padding-left: 20px; color: #475569;">
+                    <li>Carregando...</li>
+                </ul>
+            </div>
+
+            <button class="mock-btn" id="btn-candidatar" onclick="abrirModalCandidatura()">Candidatar-se</button>
+        </div>
+    </div>
+    
+    <div id="candidaturaModal" class="modal">
+        <div class="modal-content">
+            <h4><i class="fa-solid fa-paper-plane"></i> Finalizar Candidatura</h4>
+            <p style="font-size: 14px; color: #64748b;">Confirme e envie sua **Carta de Apresentação** (Opcional).</p>
+            <div class="form-group">
+                <label for="curriculo">Anexar Currículo (.pdf) *</label>
+                <input type="file" id="curriculo" accept=".pdf" required>
+            </div>
+            <textarea id="mensagem" placeholder="Sua motivação para participar do projeto e o que pode oferecer..."></textarea>
+            
+            <button class="mock-btn" onclick="enviarCandidatura()">Enviar Candidatura</button>
+            <button class="mock-btn mock-btn-secondary" onclick="fecharModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        let projetoAtual = null;
+        const ALUNO_ID = parseInt(localStorage.getItem('userId')) || 201;
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="../professor/portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="../professor/criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'aluno');
+
+        async function carregarDetalhes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = parseInt(urlParams.get('id'));
+
+            if (!projectId) {
+                document.getElementById('project-titulo').textContent = 'Projeto não encontrado.';
+                return;
+            }
+            
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { projetos: [] };
+            
+            projetoAtual = db.projetos.find(p => p.id === projectId);
+
+            if (projetoAtual) {
+                document.getElementById('project-titulo').textContent = projetoAtual.titulo;
+                document.getElementById('project-info').innerHTML = `
+                    <i class="fa-solid fa-calendar-alt"></i> Status: ${projetoAtual.status} | 
+                    <i class="fa-solid fa-user-tie"></i> Coordenador: Professor(a) do Depto. de ${projetoAtual.area.split(' ')[0]}
+                `;
+                document.getElementById('project-descricao').textContent = projetoAtual.descricao;
+                
+                document.getElementById('project-requisitos').innerHTML = `
+                    <li>Vaga: ${projetoAtual.vaga}</li>
+                    <li>Área: ${projetoAtual.area}</li>
+                    <li>Carga Horária: ${projetoAtual.carga_horaria}</li>
+                    <li>Requisitos: Mínimo 3º período e conhecimento básico em ${projetoAtual.area}.</li>
+                `;
+                
+                verificarCandidatura(projectId);
+
+            } else {
+                document.getElementById('project-titulo').textContent = 'Projeto não encontrado.';
+            }
+        }
+
+        function verificarCandidatura(id) {
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { candidaturas: [] };
+            
+            const candidaturas = db.candidaturas;
+            const btn = document.getElementById('btn-candidatar');
+
+            if (candidaturas.some(c => c.projetoId === id && c.alunoId === ALUNO_ID)) {
+                btn.textContent = 'Candidatura Já Enviada';
+                btn.classList.add('candidatado');
+                btn.onclick = () => alert('Você já se candidatou a este projeto.');
+            }
+        }
+
+        const modal = document.getElementById('candidaturaModal');
+        function abrirModalCandidatura() { modal.style.display = 'block'; }
+        function fecharModal() { modal.style.display = 'none'; }
+        
+        function enviarCandidatura() {
+            if (!document.getElementById('curriculo').value) {
+                alert('É necessário anexar um currículo (simulação).');
+                return;
+            }
+
+            const mensagem = document.getElementById('mensagem').value;
+            
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { candidaturas: [] };
+            
+            const alunoLogado = {
+                "nome": "Alex Pereira",
+                "matricula": "12231013",
+                "curso": "Ciência da Computação",
+                "periodo": "5º",
+                "email": "alex.aluno@id.uff.br",
+                "curriculo": "Experiência com HTML, CSS, e JS, além de interesse em UX/UI. Busco aplicar meus conhecimentos em um projeto real de extensão. Currículo disponível."
+            };
+
+            if (projetoAtual && !db.candidaturas.some(c => c.projetoId === projetoAtual.id && c.alunoId === ALUNO_ID)) {
+                const novaCandidatura = {
+                    alunoId: ALUNO_ID,
+                    projetoId: projetoAtual.id,
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    mensagem: mensagem || 'Nenhuma',
+                    status: 'PENDENTE',
+                    aluno: alunoLogado
+                };
+                db.candidaturas.push(novaCandidatura);
+                
+                // Atualiza o DB central
+                localStorage.setItem('PROTÓTIPO_DB', JSON.stringify(db));
+            }
+
+            fecharModal();
+            window.location.href = 'aplicacao_confirmada.html';
+        }
+    </script>
+</body>
+</html>

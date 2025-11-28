@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Projetos - Extende UFF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        /* Navbar de mock */
+        .navbar {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+        /* Layout Principal */
+        .main-content {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        /* Barra Lateral (Filtros) */
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-right: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .sidebar h3 {
+            color: #1e3a8a;
+            font-size: 18px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .mock-select, .mock-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn-aplicar {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-aplicar:hover {
+            background-color: #059669;
+        }
+
+        /* Área de Projetos */
+        .projects-area {
+            flex: 1;
+        }
+        .projects-area h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .project-count {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .project-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 6px solid #1d4ed8;
+        }
+        .project-card h3 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 22px;
+        }
+        .tag-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .tag {
+            background-color: #e2e8f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .tag.highlight {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+        .btn-detalhes {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 15px;
+            cursor: pointer;
+            text-decoration: none; /* Para usar como link */
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .btn-detalhes:hover {
+            background-color: #172b5c;
+        }
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        
+        <div class="sidebar">
+            <h3><i class="fa-solid fa-filter"></i> Refinar Busca</h3>
+            
+            <div class="form-group">
+                <label for="area_tematica">Área Temática</label>
+                <select class="mock-select" id="area_tematica">
+                    <option value="todos">Qualquer Área</option>
+                    <option value="Ciência da Computação">Ciência da Computação</option>
+                    <option value="Engenharia Química">Engenharia Química</option>
+                    <option value="Design">Design</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_vaga">Tipo de Vaga</label>
+                <select class="mock-select" id="tipo_vaga">
+                    <option value="todos">Qualquer Tipo</option>
+                    <option value="Bolsa de Extensão">Bolsa de Extensão</option>
+                    <option value="Voluntariado">Voluntariado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="interseccionalidade">Inclusão/Interseccionalidade</label>
+                <select class="mock-select" id="interseccionalidade">
+                    <option value="todos">Sem Filtro de Inclusão</option>
+                    <option value="Vaga Afirmativa">Vagas Afirmativas (Prioridade)</option>
+                    <option value="Mulheres em Tecnologia">Mulheres em Tecnologia</option>
+                    <option value="Pessoa com Deficiência (PCD)">Acessibilidade/PCD</option>
+                    <option value="Renda Baixa">Renda Baixa</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select class="mock-select" id="status">
+                    <option value="Aceitando Inscrições">Aceitando Inscrições</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Encerrado">Encerrado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="carga_horaria">Carga Horária / Horário</label>
+                <select class="mock-select" id="carga_horaria">
+                    <option value="todos">Qualquer Horário</option>
+                    <option value="Flexível / Remoto">Flexível / Remoto</option>
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="palavras_chave">Palavras-chave</label>
+                <input type="text" class="mock-input" id="palavras_chave" placeholder="Ex: Sustentabilidade, IA, Educação">
+            </div>
+
+            <button class="btn-aplicar" onclick="carregarProjetos()">
+                <i class="fa-solid fa-check"></i> Aplicar Filtros
+            </button>
+        </div>
+
+        <div class="projects-area">
+            <h2><i class="fa-solid fa-list-check"></i> Projetos Disponíveis</h2>
+            
+            <div id="project-list">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const ALUNO_ID = parseInt(localStorage.getItem('userId')) || 201;
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="../professor/portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="../professor/criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'aluno');
+
+        function carregarProjetos() {
+            const listDiv = document.getElementById('project-list');
+            listDiv.innerHTML = '';
+            
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            if (!dbString) {
+                listDiv.innerHTML = '<div class="error-message">Erro ao carregar os dados dos projetos. Verifique se o arquivo data.txt existe.</div>';
+                return;
+            }
+            
+            const db = JSON.parse(dbString);
+            const projetos = db.projetos || [];
+
+            // 1. Coletar Filtros
+            const areaFiltro = document.getElementById('area_tematica').value;
+            const vagaFiltro = document.getElementById('tipo_vaga').value;
+            const statusFiltro = document.getElementById('status').value;
+            const horarioFiltro = document.getElementById('carga_horaria').value;
+            const interseccionalidadeFiltro = document.getElementById('interseccionalidade').value;
+            const palavrasChaveFiltro = document.getElementById('palavras_chave').value.toLowerCase().trim();
+
+            // 2. Aplicar Filtros
+            const projetosFiltrados = projetos.filter(projeto => {
+                // Filtros Simples
+                if (areaFiltro !== 'todos' && projeto.area !== areaFiltro) return false;
+                if (vagaFiltro !== 'todos' && projeto.vaga !== vagaFiltro) return false;
+                if (statusFiltro !== projeto.status) return false;
+                if (horarioFiltro !== 'todos' && projeto.carga_horaria !== horarioFiltro) return false;
+
+                // Novo Filtro Interseccionalidade
+                if (interseccionalidadeFiltro !== 'todos') {
+                    // Verifica se o projeto TEM a tag de interseccionalidade solicitada
+                    if (!projeto.tags.includes(interseccionalidadeFiltro)) {
+                        return false;
+                    }
+                }
+
+                // Filtro Palavras-chave
+                if (palavrasChaveFiltro.length > 0) {
+                    const textoBusca = `${projeto.titulo.toLowerCase()} ${projeto.descricao.toLowerCase()} ${projeto.tags.join(' ').toLowerCase()}`;
+                    if (!textoBusca.includes(palavrasChaveFiltro)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // 3. Renderizar Resultados
+            document.querySelector('.projects-area h2').innerHTML = `
+                <i class="fa-solid fa-list-check"></i> Projetos Disponíveis
+            `;
+
+            if (projetosFiltrados.length === 0) {
+                listDiv.innerHTML = `<div class="project-count">0 resultados encontrados para os filtros aplicados.</div>`;
+            } else {
+                listDiv.innerHTML = `<div class="project-count">${projetosFiltrados.length} resultados encontrados com os filtros aplicados.</div>`;
+                
+                projetosFiltrados.forEach(projeto => {
+                    const tagsHtml = projeto.tags.map(tag => {
+                        let tagClass = 'tag';
+                        if (tag === 'Bolsa' || tag === 'Voluntariado' || tag === 'Vaga Afirmativa') {
+                            tagClass += ' highlight';
+                        }
+                        return `<span class="${tagClass}">${tag}</span>`;
+                    }).join('');
+
+                    const cardHtml = `
+                        <div class="project-card">
+                            <h3>${projeto.titulo}</h3>
+                            <div class="tag-group">
+                                ${tagsHtml}
+                            </div>
+                            <p style="font-size: 16px; color: #475569; margin-bottom: 0; line-height: 1.5;">
+                                ${projeto.descricao}
+                            </p>
+                            <a href="detalhes_projeto.html?id=${projeto.id}" class="btn-detalhes">Ver Detalhes</a>
+                        </div>
+                    `;
+                    listDiv.innerHTML += cardHtml;
+                });
+            }
+        }
+
+        // Carrega os projetos ao iniciar a página
+        document.addEventListener('DOMContentLoaded', carregarProjetos);
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Candidaturas - Extende UFF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+        /* Navbar de mock */
+        .navbar {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+        /* Conteúdo Principal */
+        h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .candidatura-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .candidatura-card h4 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+        .btn-cancelar {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-cancelar:hover {
+            background-color: #dc2626;
+        }
+        .status-tag {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .status-pendente {
+            background-color: #fcd34d;
+            color: #92400e;
+        }
+        .status-selecionado {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-rejeitado {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .candidatura-card p {
+            margin: 0;
+        }
+        .candidatura-card a {
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</h2>
+        <p style="color: #64748b; margin-bottom: 30px;">Acompanhe o status dos projetos para os quais você aplicou.</p>
+        
+        <div id="candidaturas-list">
+            </div>
+
+    </div>
+
+    <script>
+        const ALUNO_ID = parseInt(localStorage.getItem('userId')) || 201;
+
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                // Mockup: professor não deve acessar candidaturas de aluno, mas mantém navegação
+                links = `
+                    <a href="../professor/portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="../professor/criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'aluno');
+
+        function cancelarCandidatura(projetoId) {
+            if (confirm("Tem certeza que deseja cancelar sua candidatura para este projeto?")) {
+                const dbString = localStorage.getItem('PROTÓTIPO_DB');
+                const db = dbString ? JSON.parse(dbString) : { candidaturas: [] };
+
+                // Filtra e remove a candidatura específica do aluno
+                db.candidaturas = db.candidaturas.filter(c => !(c.alunoId === ALUNO_ID && c.projetoId === projetoId));
+                
+                localStorage.setItem('PROTÓTIPO_DB', JSON.stringify(db));
+                
+                carregarCandidaturas(); // Recarrega a lista
+            }
+        }
+
+        function carregarCandidaturas() {
+            const listaDiv = document.getElementById('candidaturas-list');
+            listaDiv.innerHTML = '';
+            
+            const dbString = localStorage.getItem('PROTÓTIPO_DB');
+            const db = dbString ? JSON.parse(dbString) : { projetos: [], candidaturas: [] };
+            
+            // Filtra apenas as candidaturas do aluno logado (ALUNO_ID)
+            const candidaturasDoAluno = db.candidaturas.filter(c => c.alunoId === ALUNO_ID);
+
+            if (candidaturasDoAluno.length === 0) {
+                listaDiv.innerHTML = '<div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);"><p style="color: #64748b; text-align: center;">Você ainda não se candidatou a nenhum projeto.</p><p style="text-align: center;"><a href="portal_aluno.html" style="color: #1e3a8a; font-weight: bold;">Clique aqui para buscar vagas!</a></p></div>';
+                return;
+            }
+
+            candidaturasDoAluno.forEach(candidatura => {
+                let statusClass = 'status-pendente';
+                let statusTexto = 'EM ANÁLISE';
+                
+                if (candidatura.status === 'APROVADO') {
+                     statusClass = 'status-selecionado';
+                     statusTexto = 'APROVADO';
+                } else if (candidatura.status === 'REJEITADO') {
+                     statusClass = 'status-rejeitado';
+                     statusTexto = 'REJEITADO';
+                }
+
+                // CORREÇÃO: BUSCA O PROJETO CORRESPONDENTE PELO ID
+                const projeto = db.projetos.find(p => p.id === candidatura.projetoId);
+                const tituloProjeto = projeto ? projeto.titulo : 'Erro: Título Indisponível';
+                const areaProjeto = projeto ? projeto.area : 'N/A';
+                
+                const cardHtml = `
+                    <div class="candidatura-card">
+                        <button class="btn-cancelar" onclick="cancelarCandidatura(${candidatura.projetoId})">
+                            <i class="fa-solid fa-times-circle"></i> Cancelar Candidatura
+                        </button>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4>${tituloProjeto} (${areaProjeto})</h4>
+                            <span class="status-tag ${statusClass}">${statusTexto}</span>
+                        </div>
+                        <p style="font-size: 14px; color: #475569; margin-bottom: 5px;">
+                            <i class="fa-solid fa-calendar-alt"></i> Enviada em: ${candidatura.data || 'Hoje'}
+                        </p>
+                        <p style="font-size: 14px; color: #475569;">
+                            <i class="fa-solid fa-envelope"></i> Mensagem: ${candidatura.mensagem || '(Nenhuma)'}
+                        </p>
+                        <a href="detalhes_projeto.html?id=${candidatura.projetoId}" style="font-size: 14px; color: #1e3a8a;">Ver Detalhes do Projeto</a>
+                    </div>
+                `;
+                listaDiv.innerHTML += cardHtml;
+            });
+        }
+
+        // Chama a função ao carregar a página
+        document.addEventListener('DOMContentLoaded', carregarCandidaturas);
+    </script>
+</body>
+</html>
