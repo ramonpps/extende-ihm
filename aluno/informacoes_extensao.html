@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informações - Extende UFF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Estilos Comuns */
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+        h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        p {
+            color: #475569;
+            line-height: 1.6;
+        }
+        ul, ol {
+            color: #475569;
+            line-height: 1.6;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .info-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-circle-info"></i> Central de Informações Extende UFF</h2>
+        <p>Tudo o que você precisa saber para se engajar nos projetos de extensão e utilizar o portal com eficiência.</p>
+
+        <div class="info-card">
+            <h3><i class="fa-solid fa-graduation-cap"></i> Projetos de Extensão: Integrando Ensino e Sociedade</h3>
+            <p>Os **Projetos de Extensão (PE)** da UFF são iniciativas que articulam o conhecimento acadêmico com as necessidades da sociedade. Eles transformam o saber produzido na universidade em ações que beneficiam comunidades, empresas e instituições, complementando a formação do aluno e estimulando a responsabilidade social.</p>
+            <p><strong>Por que participar?</strong></p>
+            <ul>
+                <li>Cumprir as horas de Extensão obrigatórias para a graduação (CURRICULARIZAÇÃO).</li>
+                <li>Aplicar o conhecimento teórico em problemas reais, aprofundando o aprendizado.</li>
+                <li>Desenvolver habilidades essenciais como trabalho em equipe e liderança.</li>
+                <li>Possibilidade de obter **bolsas** ou **certificação** de voluntariado, valorizando seu currículo.</li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <h3><i class="fa-solid fa-user-check"></i> Guia Rápido de Usabilidade do Portal</h3>
+            <p>O portal Extende foi desenhado para ser intuitivo e focado em filtros para otimizar sua busca. Use as ferramentas abaixo para navegar de forma eficiente:</p>
+            <ul>
+                <li><strong>Buscar Projetos:</strong> Use o painel de filtros lateral para refinar a busca por **tipo de vaga** (Bolsa/Voluntário), **área do conhecimento** e **status do projeto** (Aceitando Inscrições).</li>
+                <li><strong>Filtro de Inclusão/Interseccionalidade:</strong> Utilize o filtro "Priorizar" para localizar projetos que oferecem vagas afirmativas ou focadas em categorias de diversidade (ex: Negritude, PCD, Mulheres em Tecnologia).</li>
+                <li><strong>Minhas Candidaturas:</strong> Monitore o status de todas as suas aplicações. Você pode cancelar candidaturas que ainda estão pendentes.</li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <h3><i class="fa-solid fa-scroll"></i> Processo de Candidatura e Seleção</h3>
+            <p>O processo de seleção para projetos de extensão é conduzido diretamente pelo professor coordenador de cada projeto e geralmente segue estas etapas:</p>
+            <ol>
+                <li>**Busca e Candidatura:** Você envia sua aplicação (currículo e mensagem de interesse) através do portal.</li>
+                <li>**Análise e Priorização:** O professor analisa seu perfil, seu currículo e a sua mensagem. Ele pode dar **prioridade a candidatos** que se enquadrem nas categorias de inclusão e diversidade definidas pelo projeto.</li>
+                <li>**Triagem:** Os professores têm acesso a um painel que permite filtrar e analisar o perfil de todos os candidatos de forma centralizada.</li>
+                <li>**Resultado:** Você é notificado via e-mail e através da seção **"Minhas Candidaturas"** sobre a aprovação. Candidaturas aprovadas ou rejeitadas são removidas da lista de "Pendentes" do professor.</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Função que renderiza a Navbar (com o link de Informações)
+        function getNavbar(userType) {
+            let links = '';
+            if (userType === 'aluno') {
+                links = `
+                    <a href="portal_aluno.html"><i class="fa-solid fa-magnifying-glass"></i> Buscar Projetos</a>
+                    <a href="candidaturas.html"><i class="fa-solid fa-file-signature"></i> Minhas Candidaturas</a>
+                `;
+            } else if (userType === 'professor') {
+                links = `
+                    <a href="../professor/portal_professor.html"><i class="fa-solid fa-chalkboard-teacher"></i> Painel do Coordenador</a>
+                    <a href="../professor/criar_projeto.html"><i class="fa-solid fa-plus-circle"></i> Criar Novo Projeto</a>
+                `;
+            }
+            return `<div class="navbar"><h1>Extende UFF</h1><div>${links}<a href="../login.html" onclick="localStorage.removeItem('userType'); localStorage.removeItem('userId')"><i class="fa-solid fa-sign-out-alt"></i> Sair</a></div></div>`;
+        }
+        
+        // Chamada para renderizar a navbar
+        document.getElementById('navbar-placeholder').innerHTML = getNavbar(localStorage.getItem('userType') || 'aluno');
+    </script>
+</body>
+</html>
